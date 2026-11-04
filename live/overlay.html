@@ -172,16 +172,29 @@ function showChant(text){ document.getElementById('chantText').textContent=text;
 /* ======================= audio ======================= */
 let AC=null, master=null, musicGain=null, sfx=null, settings={ music:true, mo:true, moBpm:52 };
 const TRACKS=['/assets/music/music1.mp3','/assets/music/music2.mp3']; let trackIdx=Math.floor(Math.random()*TRACKS.length), musicEl=null;
-function startAudio(){
+async function startAudio(){
+  // Avoid creating duplicate AudioContexts if startup is triggered more than once.
+  if (AC) {
+    if (AC.state === 'suspended') {
+      try { await AC.resume(); } catch (err) { console.warn('AudioContext chưa được trình duyệt cho phép:', err); }
+    }
+    return;
+  }
+
   AC = new (window.AudioContext||window.webkitAudioContext)();
   master = AC.createGain(); master.gain.value=.9; master.connect(AC.destination);
   musicGain = AC.createGain(); musicGain.gain.value=settings.music?.5:0; musicGain.connect(master);
   sfx = AC.createGain(); sfx.gain.value=1; sfx.connect(master);
-  nextTrack(); scheduleMo(); bell();
+
+  // Request playback immediately when the overlay loads.
+  try { await AC.resume(); } catch (err) { console.warn('Không thể tự resume AudioContext:', err); }
+  nextTrack();
+  scheduleMo();
+  bell();
 }
 
-// Tự khởi tạo âm thanh khi Overlay vừa tải, không cần nút bật âm thanh.
-startAudio();
+// Tự khởi tạo âm thanh ngay khi Overlay tải, không cần nút bật âm thanh.
+startAudio().catch(err => console.error('Không thể khởi tạo âm thanh:', err));
 function nextTrack(){
   if (musicEl){ musicEl.pause(); }
   musicEl = new Audio(TRACKS[trackIdx++ % TRACKS.length]); const src=AC.createMediaElementSource(musicEl); src.connect(musicGain);
