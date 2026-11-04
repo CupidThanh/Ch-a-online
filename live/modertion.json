@@ -1,0 +1,6 @@
+{
+    "blockedTerms": [],
+    "blockLinks": true,
+    "blockPhoneNumbers": true,
+    "maxCommentsPer10Seconds": 3
+}
