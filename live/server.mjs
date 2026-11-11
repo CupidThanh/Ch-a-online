@@ -1,5 +1,5 @@
 // Adapted from kentjuno/chanh-dien-online (MIT). Copyright (c) 2026 Kent Juno.
-// Chánh Điện Tịnh Tâm — live server
+// Karaoke Tay Vịn Cún Cưng — live server
 // Runs on the streaming PC. Serves the overlay + control panel, listens to a TikTok LIVE room,
 // keeps the list of seated viewers, generates Vietnamese voice lines with Edge TTS and pushes
 // everything to the overlay over WebSocket.
@@ -68,13 +68,14 @@ function publicName(value){ const result = reviewText(String(value || '')); retu
 
 /* ------------------------------------------------------------------ state */
 const settings = {
-  title: 'Chánh Điện Tịnh Tâm',
-  subtitle: 'Nam Mô A Di Đà Phật',
+  title: 'KARAOKE TAY VỊN CÚN CƯNG',
+  subtitle: 'Chọn bài hát · Bình chọn 1–5 · Lên sân khấu cùng Corgi',
   voice: 'vi-VN-NamMinhNeural',      // or vi-VN-HoaiMyNeural
   pitch: -18,                        // Hz
   rate: -20,                         // %
-  music: true, mo: true, moBpm: 52,
-  autoChant: true, chantEveryMin: 3,
+  music: true, mo: false, moBpm: 52,
+  autoChant: false, chantEveryMin: 3,
+  videoUrl: '', activeSong: 0,
   seatMode: 'auto',                  // auto | 24 | 36 | 64 | 100
   idleMinutes: 0,                   // 0 disables inferred departure; not a TikTok leave signal
   joinOnEnter: false,                // also seat viewers who only enter the room
@@ -83,6 +84,14 @@ const settings = {
 const meritLedger = new Map();       // preserve session gift points when someone returns
 const viewers = new Map();           // id -> { id, name, skin, avatar, coins, joinedAt, lastAt, lastText, lastTextAt, demo }
 const startedAt = Date.now();
+const SONGS = [
+  { title:'Bài hát số 1', artist:'Đang chờ cấu hình' },
+  { title:'Bài hát số 2', artist:'Đang chờ cấu hình' },
+  { title:'Bài hát số 3', artist:'Đang chờ cấu hình' },
+  { title:'Bài hát số 4', artist:'Đang chờ cấu hình' },
+  { title:'Bài hát số 5', artist:'Đang chờ cấu hình' },
+];
+const voteLedger = new Map();
 let tiktok = null, tiktokState = { status: 'idle', uniqueId: '', error: '' };
 const log = [];
 function addLog(s){ const line = `[${new Date().toLocaleTimeString('vi-VN')}] ${s}`; log.push(line); if (log.length > 300) log.shift(); broadcast({ t:'log', line }, 'control'); console.log(line); }
@@ -106,7 +115,7 @@ function skinFromText(t){
 const DEFAULT_SKINS = ['man', 'woman', 'woman', 'man', 'granny'];
 
 function pub(v){ return { id:v.id, name:v.name, skin:v.skin, avatar:v.avatar||'', coins:v.coins, demo:!!v.demo }; }
-function snapshot(){ return { t:'state', settings, viewers:[...viewers.values()].map(pub), cap: capacity(), startedAt, tiktok: tiktokState }; }
+function snapshot(){ return { t:'state', settings, viewers:[...viewers.values()].map(pub), cap: capacity(), startedAt, tiktok: tiktokState, songs:SONGS, votes:Object.fromEntries(voteLedger) }; }
 
 function seat(id, name, opts = {}){
   let v = viewers.get(id);
@@ -140,6 +149,14 @@ function expireInactive(now = Date.now()){
 
 /* ------------------------------------------------------------- events in */
 function onChat(id, name, text, avatar){
+  const voteMatch = String(text || '').trim().match(/^(?:bình chọn\\s*)?([1-5])$/iu);
+  if (voteMatch) {
+    const choice = Number(voteMatch[1]);
+    voteLedger.set(choice, (voteLedger.get(choice) || 0) + 1);
+    broadcast({ t:'votes', votes:Object.fromEntries(voteLedger), songs:SONGS });
+    addLog(`Bình chọn bài ${choice} từ ${publicName(name)}`);
+    return;
+  }
   // Exact, allowlisted outfit commands do not consume the comment spam budget.
   const command = skinFromText(cleanText(text));
   const reviewed = command ? reviewText(text) : moderateComment(id, text);
@@ -167,7 +184,7 @@ function onGift(id, name, giftName, count, diamonds, avatar){
   v.coins += coins; meritLedger.set(id, { coins:v.coins });
   const prayer = (v.lastText && Date.now() - v.lastTextAt < 90_000 && v.lastText.length > 6) ? v.lastText : pickPrayer();
   const tier = coins >= 99 ? 3 : coins >= 10 ? 2 : 1;
-  const line = `Nam mô A Di Đà Phật. Phật tử ${spoken(v.name)} thành tâm dâng ${giftName}${count > 1 ? ', ' + count + ' lần' : ''}. ${prayer}.`;
+  const line = `${spoken(v.name)} vừa tặng ${giftName}${count > 1 ? ', số lượng ' + count : ''}. Cảm ơn bạn đã ủng hộ Karaoke Tay Vịn Cún Cưng!`;
   broadcast({ t:'gift', id, name: v.name, giftName, count, coins, total: v.coins, tier, prayer });
   if (settings.gifts.readAll || coins >= settings.gifts.minDiamonds) say(line, { tag:'gift', id });
 }
@@ -350,6 +367,9 @@ function onControl(m){
     case 'gift': { const n = publicName(m.name || 'Khách'); onGift('sim_' + n, n, String(m.gift || 'Hoa hồng').slice(0, 30), clamp(m.count, 1, 99), clamp(m.diamonds, 1, 50000)); break; }
     case 'fill': fillDemo(clamp(m.n, 1, 100)); addLog(`Đổ người mẫu: ${viewers.size} người`); break;
     case 'clear': clearSeats(); break;
+    case 'voteReset': voteLedger.clear(); broadcast({ t:'votes', votes:{}, songs:SONGS }); addLog('Đã reset bình chọn'); break;
+    case 'songSet': { const i=clamp(m.index,1,5)-1; SONGS[i]={title:String(m.title||`Bài hát ${i+1}`).slice(0,100),artist:String(m.artist||'').slice(0,80)}; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger)}); break; }
+    case 'songNext': settings.activeSong=(settings.activeSong+1)%5; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger)}); addLog('Chuyển bài hát đang phát'); break;
     case 'leave': if (typeof m.id === 'string') leaveViewer(m.id); break;
     case 'bell': broadcast({ t:'bell' }); break;
     case 'mo': broadcast({ t:'mo1' }); break;
@@ -364,7 +384,7 @@ function onControl(m){
 
 // Only known keys, right types, sane ranges: the panel is local, but nothing from the socket is trusted blindly.
 const SETTING_RULES = {
-  title: v => String(v).slice(0, 40), subtitle: v => String(v).slice(0, 60),
+  title: v => String(v).slice(0, 60), subtitle: v => String(v).slice(0, 100), videoUrl: v => { const s=String(v||'').trim(); return /^https?:\\/\\//i.test(s) ? s.slice(0,500) : ''; }, activeSong: v => clamp(v,0,4),
   voice: v => ['vi-VN-NamMinhNeural', 'vi-VN-HoaiMyNeural'].includes(v) ? v : settings.voice,
   pitch: v => clamp(v, -50, 50), rate: v => clamp(v, -50, 50), moBpm: v => clamp(v, 20, 120), chantEveryMin: v => clamp(v, 1, 60),
   music: Boolean, mo: Boolean, autoChant: Boolean, joinOnEnter: Boolean,
