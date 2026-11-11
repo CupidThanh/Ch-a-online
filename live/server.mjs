@@ -149,7 +149,7 @@ function expireInactive(now = Date.now()){
 
 /* ------------------------------------------------------------- events in */
 function onChat(id, name, text, avatar){
-  const voteMatch = String(text || '').trim().match(/^(?:bình chọn\\s*)?([1-5])$/iu);
+    const voteMatch = String(text || '').trim().match(/^(?:bình chọn\s*)?([1-5])$/iu);
   if (voteMatch) {
     const choice = Number(voteMatch[1]);
     voteLedger.set(choice, (voteLedger.get(choice) || 0) + 1);
@@ -384,7 +384,9 @@ function onControl(m){
 
 // Only known keys, right types, sane ranges: the panel is local, but nothing from the socket is trusted blindly.
 const SETTING_RULES = {
-  title: v => String(v).slice(0, 60), subtitle: v => String(v).slice(0, 100), videoUrl: v => { const s=String(v||'').trim(); return /^https?:\\/\\//i.test(s) ? s.slice(0,500) : ''; }, activeSong: v => clamp(v,0,4),
+    title: v => String(v).slice(0, 60), subtitle: v => String(v).slice(0, 100),
+  videoUrl: v => { const s=String(v||'').trim(); return /^https?:\/\//i.test(s) ? s.slice(0,500) : ''; },
+  activeSong: v => clamp(v,0,4),
   voice: v => ['vi-VN-NamMinhNeural', 'vi-VN-HoaiMyNeural'].includes(v) ? v : settings.voice,
   pitch: v => clamp(v, -50, 50), rate: v => clamp(v, -50, 50), moBpm: v => clamp(v, 20, 120), chantEveryMin: v => clamp(v, 1, 60),
   music: Boolean, mo: Boolean, autoChant: Boolean, joinOnEnter: Boolean,
@@ -430,7 +432,7 @@ function setBots(on, n, pace){
 //  • no TikTok password, cookie or session is ever used or stored; only public room events are read
 const HOST = process.env.HOST || '127.0.0.1';
 const MIME = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css', '.json':'application/json',
-  '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.mp3':'audio/mpeg', '.svg':'image/svg+xml', '.ico':'image/x-icon' };
+  '.png':'image/png', '.jpg':'image/jpeg', '.webp':'image/webp', '.mp3':'audio/mpeg', '.mp4':'video/mp4', '.webm':'video/webm', '.svg':'image/svg+xml', '.ico':'image/x-icon' };
 const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`, `[::1]:${PORT}`]);
 const okHost = h => ALLOWED_HOSTS.has(String(h || '').toLowerCase());
 const SEP = path.sep;
