@@ -40,7 +40,7 @@ Trong TikTok LIVE Studio, thêm nguồn Window Capture và chọn cửa sổ ove
 - Không yêu cầu mật khẩu, cookie hay session TikTok; chỉ đọc sự kiện phòng LIVE công khai.
 - `tiktok-live-connector` là thư viện cộng đồng, có thể ngừng hoạt động khi TikTok thay đổi hệ thống.
 - Chỉ sử dụng video, nhạc và hình ảnh mà bạn có quyền phát trên nền tảng livestream. Video URL phải cho phép trình duyệt phát/nhúng.
-- Bản dựng giao diện hiện dùng emoji Corgi làm nhân vật tạm thời; bộ đồ họa Corgi 2D riêng có thể được thay thế trong giai đoạn tài nguyên hình ảnh.
+- Sân khấu hiện sử dụng mascot Corgi 2D dạng SVG tại `assets/karaoke/corgi.svg`; có thể thay thế bằng bộ sprite hoạt hình nhiều tư thế ở giai đoạn hoàn thiện đồ họa.
 
 ## Giấy phép
 MIT. Xem `LICENSE`.
