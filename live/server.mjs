@@ -368,8 +368,8 @@ function onControl(m){
     case 'fill': fillDemo(clamp(m.n, 1, 100)); addLog(`Đổ người mẫu: ${viewers.size} người`); break;
     case 'clear': clearSeats(); break;
     case 'voteReset': voteLedger.clear(); broadcast({ t:'votes', votes:{}, songs:SONGS }); addLog('Đã reset bình chọn'); break;
-    case 'songSet': { const i=clamp(m.index,1,5)-1; SONGS[i]={title:String(m.title||`Bài hát ${i+1}`).slice(0,100),artist:String(m.artist||'').slice(0,80)}; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger)}); break; }
-    case 'songNext': settings.activeSong=(settings.activeSong+1)%5; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger)}); addLog('Chuyển bài hát đang phát'); break;
+    case 'songSet': { const i=clamp(m.index,1,5)-1; SONGS[i]={title:String(m.title||`Bài hát ${i+1}`).slice(0,100),artist:String(m.artist||'').slice(0,80)}; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger),settings}); break; }
+    case 'songNext': settings.activeSong=(settings.activeSong+1)%5; broadcast({t:'songs',songs:SONGS,votes:Object.fromEntries(voteLedger),settings}); addLog('Chuyển bài hát đang phát'); break;
     case 'leave': if (typeof m.id === 'string') leaveViewer(m.id); break;
     case 'bell': broadcast({ t:'bell' }); break;
     case 'mo': broadcast({ t:'mo1' }); break;
