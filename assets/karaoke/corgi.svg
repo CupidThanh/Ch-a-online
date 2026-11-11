@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs><linearGradient id="fur" x2="0" y2="1"><stop stop-color="#f6c47d"/><stop offset="1" stop-color="#d88c4c"/></linearGradient><linearGradient id="cream" x2="0" y2="1"><stop stop-color="#fff3d9"/><stop offset="1" stop-color="#f5d9b4"/></linearGradient></defs>
+<ellipse cx="256" cy="464" rx="145" ry="24" fill="#180d20" opacity=".2"/>
+<!-- ears --><path d="M112 191 69 48q-8-26 20-13l125 88M400 191l43-143q8-26-20-13L298 123" fill="#b96c3e" stroke="#75402e" stroke-width="12" stroke-linejoin="round"/>
+<path d="m105 119 35 70 57-67M407 119l-35 70-57-67" fill="#f4a0a0"/>
+<!-- body --><path d="M132 299q-12-102 43-132 76-42 162 0 55 30 43 132l-15 122q-4 31-35 31h-29q-25 0-28-28l-5-58h-24l-5 58q-3 28-28 28h-29q-31 0-35-31z" fill="url(#fur)" stroke="#75402e" stroke-width="12"/>
+<!-- face cream mask --><path d="M150 206q28-82 106-82t106 82q18 60-18 118-35 57-88 57t-88-57q-36-58-18-118" fill="url(#cream)" stroke="#75402e" stroke-width="10"/>
+<!-- eye patches --><ellipse cx="190" cy="235" rx="35" ry="43" fill="#9d5938"/><ellipse cx="322" cy="235" rx="35" ry="43" fill="#9d5938"/>
+<ellipse cx="193" cy="237" rx="10" ry="14" fill="#21151a"/><ellipse cx="319" cy="237" rx="10" ry="14" fill="#21151a"/><circle cx="197" cy="231" r="4" fill="#fff"/><circle cx="323" cy="231" r="4" fill="#fff"/>
+<!-- muzzle --><ellipse cx="256" cy="300" rx="70" ry="48" fill="#fff8e9"/><ellipse cx="256" cy="280" rx="19" ry="13" fill="#38232a"/><path d="M256 292v19q-18 24-39 3M256 311q18 24 39 3" fill="none" stroke="#75402e" stroke-width="8" stroke-linecap="round"/>
+<!-- cheeks --><ellipse cx="167" cy="286" rx="17" ry="10" fill="#f39b9b" opacity=".6"/><ellipse cx="345" cy="286" rx="17" ry="10" fill="#f39b9b" opacity=".6"/>
+<!-- collar --><path d="M171 375q85 36 170 0l-12 43q-73 38-146 0z" fill="#ff78a9" stroke="#75402e" stroke-width="8"/><path d="m256 394 23 23-23 29-23-29z" fill="#ffd36e" stroke="#75402e" stroke-width="6"/>
+</svg>
